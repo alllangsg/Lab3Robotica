@@ -19,8 +19,31 @@ A continuación se muestran los videos y los códigos correspondientes a la simu
 
 https://user-images.githubusercontent.com/62154397/194233427-4a2bc218-4aea-4b58-b0ff-1e485aabc81c.mp4
 
+### Solución Programada
+A continuación se explican los pasos seguidos para configurar la rutina en RobotStudio.
+- Se configuró un workobjet utilizando como base el modelado 3D del tablero inclinado disponible en el LabSIR.
+- Se configuró la herramienta posicionando el origen del TCP en la punta del modelado 3D de la herramienta diseñada en el Lab1.
+- Se definieron las siguientes trayectorias: 
+    - Una para la letra A. 
+    - Una para la letra J. 
+    - Una para ir a la posición de Home. 
+    - Una para ir a una posición de aproximación a cierta distancia del tablero, (bautizada Midpoint).
+    - Una para ir a la posición de cambio de herramienta con el brazo mirando a -x, (bautizada ToolLft).
+    
+- En la configutación de I/O System del controlador de la estación se configuraron las siguientes entradas y salidas digitales antes de reiniciarlo.
+    - Entradas digitales: DI_01, DI_02 y DI_03.
+    - Salidas Digitales: DO_01, DO_03 y DO_03.
+ - Se sincronizo todo al controlador.
+ -Para mayor practicidad se escribieron directamente las lineas de código RAPID dentro del main donde:
+     - WaitID "Nombre",1; Espera a que la entrada digital "Nombre" sea 1 para continuar ejecutando.
+     - Set "Nombre"; Da el valor de 1 lógico a la salida digital "Nombre".
+     - Reset "Nombre"; Da el valor de 0 lógico a la salida digital "Nombre".
 
 ### Código RAPID Simulación
+
+El código del modulo RAPID que dio como resultado la configuración en el RobotStudio y se exporto al Flex Pendant del controlador del ABB IRB140 fue el siguiente.
+
+La función main que llama todas las funciones utilizadas y los condicionales involucrando las entradas y salidas digitales en la rutina fue: 
 
 ```console
 PROC main()
@@ -48,6 +71,9 @@ PROC main()
     ENDPROC
 ```
 
+A continuación se muestran las funciones en RAPID correspondientes a las 5 trayectorias configuradas en el RobotStudio y utlizadas en el main().
+
+Trayectoria de la Letra J.
 ```console
 PROC PathJ()
         MoveL Target_10,v150,fine,Dummy\WObj:=Tablero1;
@@ -75,6 +101,7 @@ PROC PathJ()
     ENDPROC
 ```
 
+Trayectoria de la letra A.
 ```console
   PROC PathA()
         MoveL Target_410,v150,fine,Dummy\WObj:=Tablero1;
@@ -98,37 +125,40 @@ PROC PathJ()
         MoveL Target_590,v150,fine,Dummy\WObj:=Tablero1;
     ENDPROC
  ```
- 
+Trayectoria para ir a la posición Home.
 ```console
  PROC Homing()
         MoveAbsJ Home,v150,fine,Dummy\WObj:=Tablero1;
     ENDPROC
  ```    
- 
+
+Trayectoria para ir a la posición de aporximación de dibujo MidPoint.
 ```console
  PROC MidPoint()
         MoveAbsJ JointMID,v100,fine,MarcadorSR\WObj:=Tablero1;
     ENDPROC
  ``` 
-     
+ Trayectoria para ir a la posición de cambio de herramienta TooLft.    
  ```console
  PROC ToolLft()
         MoveAbsJ TooLft,v150,fine,MarcadorSR\WObj:=Tablero1;
     ENDPROC
  ```  
  
-```console
-    PROC ToolRg()
-       MoveAbsJ ToolRgt,v150,fine,MarcadorSR\WObj:=Tablero1;
-   ENDPROC
-``` 
-
 ## Práctica en el LabSIR
 
 ### Video
 
 https://user-images.githubusercontent.com/62154397/194236520-45fe867c-2d41-4265-b6f6-993b4ed881e3.mp4
 
+### Solución Implementada
+
+Como resultado se obtuvo un comportamiento del robot ABB IRB140 que respondia a las siguientes características:
+- Espera que se oprima el botón configurado como DI_01 para llevar al robot a Home y se enciende el bombillo configurado como DO_01 para indicar que la rutina inicio.
+- Una vez en Home espera a que se oprima el boton configurado como DI_02 para llevar la robot a una posición comoda para poder poner la herramienta de dibujo; se apaga el bombillo DO_01 y se enciende el bombillo DO_02.
+- Una vez puesta la herramienta se orpimer el boton DI_01 para llevar al robot otra vez a Home. Se paga el bombilo DO_02 y se vuelve a encender el bombillo DO_01.
+- Ya en Home, se oprime nuevamente el boton DI_01 para que el robot inicie la rutina de dibujado. El botón DO_01 sigue encendido.
+- Una vez se termine el dibujado, el robot espera en el punto de aproximación a que se oprima nuevamente el boton DI_01 para moverse a Home. Los dos bombillos se apagan para indicar la finalización de la rutina.
 
 ### Código RAPID Implementado.
 
@@ -159,12 +189,3 @@ PROC main()
         Homing;
     ENDPROC
 ```
-
-###Solución Implementada
-
-Como resultado se obtuvo un comportamiento del robot ABB IRB140 que respondia a las siguientes características:
-- Espera que se oprima el botón configurado como DI_01 para llevar al robot a Home y se enciende el bombillo configurado como DO_01 para indicar que la rutina inicio.
-- Una vez en Home espera a que se oprima el boton configurado como DI_02 para llevar la robot a una posición comoda para poder poner la herramienta de dibujo; se apaga el bombillo DO_01 y se enciende el bombillo DO_02.
-- Una vez puesta la herramienta se orpimer el boton DI_01 para llevar al robot otra vez a Home. Se paga el bombilo DO_02 y se vuelve a encender el bombillo DO_01.
-- Ya en Home, se oprime nuevamente el boton DI_01 para que el robot inicie la rutina de dibujado. El botón DO_01 sigue encendido.
-- Una vez se termine el dibujado, el robot espera en el punto de aproximación a que se oprima nuevamente el boton DI_01 para moverse a Home. Los dos bombillos se apagan para indicar la finalización de la rutina.
