@@ -127,4 +127,44 @@ PROC PathJ()
 
 ### Video
 
+https://user-images.githubusercontent.com/62154397/194236520-45fe867c-2d41-4265-b6f6-993b4ed881e3.mp4
+
+
 ### Código RAPID Implementado.
+
+El código Implementado en el controlador del brazo robótico ABB IRB140 fue casi el mismo que el usaod en la simulación. El único cambio que se realizó con ayuda del flex pendant fue un ligero cambio en las entradas digitales del main(). Como el controlador solo tenia configuradas dos entradas digitales, se reemplazo la entrada digital DI_O3 por la señal digital DI_O1 como indicador del inicio de la rutina de dibujo. Por el mismo motivo que las entradas, también se reemplazo la salida digital DI_O3 como indicador de la rutina de dibujo por la salida digital DI_O2. Dichos cambios representaron un cambio en tres lineas de código del main(), tal y como se puede apreciar a continuación.
+
+```console
+PROC main()
+        WaitDI DI_01,1;
+        Homing;
+        Set DO_01;
+        WaitDI DI_02,1;
+        Reset DO_01;
+        Set DO_02;
+        ToolLft;
+        WaitDI DI_01,1;
+        Reset DO_02;
+        Set DO_01;
+        Homing;
+        WaitDI DI_01,1;
+        Reset DO_01;
+        Set DO_02;
+        MidPoint;
+        PathJ;
+        PathA;
+        MidPoint;
+        WaitDI DI_01,1;
+        Reset DO_02;
+        Homing;
+    ENDPROC
+```
+
+###Solución Implementada
+
+Como resultado se obtuvo un comportamiento del robot ABB IRB140 que respondia a las siguientes características:
+- Espera que se oprima el botón configurado como DI_01 para llevar al robot a Home y se enciende el bombillo configurado como DO_01 para indicar que la rutina inicio.
+- Una vez en Home espera a que se oprima el boton configurado como DI_02 para llevar la robot a una posición comoda para poder poner la herramienta de dibujo; se apaga el bombillo DO_01 y se enciende el bombillo DO_02.
+- Una vez puesta la herramienta se orpimer el boton DI_01 para llevar al robot otra vez a Home. Se paga el bombilo DO_02 y se vuelve a encender el bombillo DO_01.
+- Ya en Home, se oprime nuevamente el boton DI_01 para que el robot inicie la rutina de dibujado. El botón DO_01 sigue encendido.
+- Una vez se termine el dibujado, el robot espera en el punto de aproximación a que se oprima nuevamente el boton DI_01 para moverse a Home. Los dos bombillos se apagan para indicar la finalización de la rutina.
