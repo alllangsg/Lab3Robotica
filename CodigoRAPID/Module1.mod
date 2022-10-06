@@ -69,16 +69,24 @@ MODULE Module1
     PROC main()
         WaitDI DI_01,1;
         Homing;
+        Set DO_01;
         WaitDI DI_02,1;
+        Reset DO_01;
+        Set DO_02;
         ToolLft;
         WaitDI DI_01,1;
+        Reset DO_02;
+        Set DO_01;
         Homing;
         WaitDI DI_03,1;
+        Reset DO_01;
+        Set DO_03;
         MidPoint;
         PathJ;
         PathA;
         MidPoint;
         WaitDI DI_01,1;
+        Reset DO_03;
         Homing;
     ENDPROC
     PROC PathJ()
